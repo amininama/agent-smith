@@ -50,4 +50,4 @@ target
 *.jar
 *.iml
 
-
+./bin/targets
