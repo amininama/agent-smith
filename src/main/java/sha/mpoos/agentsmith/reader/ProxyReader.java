@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import sha.mpoos.agentsmith.crawler.ProxyCrawler;
-import sha.mpoos.agentsmith.crawler.dao.ProxyDao;
+import sha.mpoos.agentsmith.dao.ProxyDao;
 import sha.mpoos.agentsmith.entity.Proxy;
 
 import javax.annotation.PostConstruct;

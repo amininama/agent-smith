@@ -1,4 +1,4 @@
-package sha.mpoos.agentsmith.crawler.dao;
+package sha.mpoos.agentsmith.dao;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
