@@ -8,7 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
-import sha.mpoos.agentsmith.crawler.entity.Proxy;
+import sha.mpoos.agentsmith.entity.Proxy;
 
 import java.io.IOException;
 import java.util.*;

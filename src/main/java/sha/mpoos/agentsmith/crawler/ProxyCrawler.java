@@ -5,17 +5,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.beans.factory.annotation.Autowired;
-import sha.mpoos.agentsmith.crawler.dao.ProxyDao;
-import sha.mpoos.agentsmith.crawler.entity.Proxy;
+import sha.mpoos.agentsmith.entity.Proxy;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 public abstract class ProxyCrawler {
     protected String sourcePage;

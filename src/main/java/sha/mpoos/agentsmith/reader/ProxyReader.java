@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import sha.mpoos.agentsmith.crawler.ProxyCrawler;
 import sha.mpoos.agentsmith.crawler.dao.ProxyDao;
-import sha.mpoos.agentsmith.crawler.entity.Proxy;
+import sha.mpoos.agentsmith.entity.Proxy;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;

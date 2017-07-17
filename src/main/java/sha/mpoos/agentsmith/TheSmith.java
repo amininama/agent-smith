@@ -1,13 +1,11 @@
 package sha.mpoos.agentsmith;
 
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sha.mpoos.agentsmith.client.Client;
 import sha.mpoos.agentsmith.config.SmithConfig;
-import sha.mpoos.agentsmith.crawler.entity.Proxy;
-import sha.mpoos.agentsmith.random.Randomizer;
+import sha.mpoos.agentsmith.entity.Proxy;
 import sha.mpoos.agentsmith.reader.AgentReader;
 import sha.mpoos.agentsmith.reader.ProxyReader;
 import sha.mpoos.agentsmith.reader.TargetListReader;

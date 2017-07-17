@@ -1,4 +1,4 @@
-package sha.mpoos.agentsmith.crawler.entity;
+package sha.mpoos.agentsmith.entity;
 
 import org.apache.http.HttpHost;
 
