@@ -32,8 +32,11 @@ public class ProxyDBCrawler extends ProxyCrawler {
         Set<Proxy> proxyList = new HashSet<>();
         log.info("Loading proxy-list from \'" + this.sourcePage + "\'");
         List<String> pages = pageList();
-        for (String page : pages)
+        for (int counter = 0; counter < pages.size(); counter++) {
+            String page = pages.get(counter);
+            log.info("Crawling page: " + (counter + 1) + "/" + pages.size());
             proxyList.addAll(crawlPage(page));
+        }
         log.info("Finished crawling '" + this.sourcePage + "'");
         return proxyList;
     }
