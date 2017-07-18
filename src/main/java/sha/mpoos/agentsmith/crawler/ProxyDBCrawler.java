@@ -41,7 +41,7 @@ public class ProxyDBCrawler extends ProxyCrawler {
     public List<String> pageList() throws IOException {
         List<String> pages = new LinkedList<>();
         Document document = Jsoup.connect(this.sourcePage).get();
-        String info = document.getElementsByClass("text-muted").first().html();
+        String info = document.getElementsByClass("text-muted").get(1).html();
         String[] infoParts = info.split(" ");
         int total = Integer.parseInt(infoParts[1]);
         for (int counter = 0; counter < total / 15; counter++) {
