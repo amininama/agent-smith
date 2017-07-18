@@ -41,7 +41,7 @@ public class TargetCollection {
         return targets;
     }
 
-    public List<Target> shuffleTargets(){
+    public List<Target> shuffleTargets() {
         List<Target> shuffled = new ArrayList<>(this.targets);
         Collections.shuffle(shuffled);
         return shuffled;
@@ -51,7 +51,10 @@ public class TargetCollection {
         this.targets = targets;
     }
 
-    public void addTarget(Target target){
-        this.targets.add(target);
+    public void addTarget(Target target) {
+        if (!this.targets.add(target)) {
+            this.targets.remove(target);
+            this.targets.add(target);
+        }
     }
 }

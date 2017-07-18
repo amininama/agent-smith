@@ -45,6 +45,7 @@ public class TargetController {
         if (targetCollection == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         Target target = new Target();
         target.setAddress(address);
+        target.setCollection(targetCollection);
         targetCollection.addTarget(target);
         targetCollection = targetCollectionDao.save(targetCollection);
         return ResponseEntity.ok(targetCollection);
@@ -69,6 +70,7 @@ public class TargetController {
         Target target = new Target();
         target.setAddress(address);
         target.setId(targetId);
+        target.setCollection(collection);
         collection.addTarget(target);
         collection = targetCollectionDao.save(collection);
         return ResponseEntity.ok(collection);
