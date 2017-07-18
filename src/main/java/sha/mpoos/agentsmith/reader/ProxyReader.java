@@ -76,21 +76,22 @@ public class ProxyReader {
     }
 
     private void refreshProxyList() {
-        try {
-            Set<Proxy> freshList = new HashSet<>();
-            for(ProxyCrawler crawler : crawlers){
-                freshList.addAll(crawler.fetchProxyInfo());
+        Set<Proxy> freshList = new HashSet<>();
+        for (ProxyCrawler crawler : crawlers) {
+            try {
+                Set<Proxy> newOnes = crawler.fetchProxyInfo();
+                freshList.addAll(newOnes);
+            } catch (Throwable t) {
+                log.warning("Error while refreshing proxy in \'" + crawler.getClass().getName() + "\' : " + t.getMessage());
             }
-            persist(freshList);
-        } catch (IOException e) {
-            log.warning("Error while refreshing proxy list: " + e.getMessage());
         }
+        persist(freshList);
     }
 
-    public void persist(Set<Proxy> proxies){
+    public void persist(Set<Proxy> proxies) {
         List<Proxy> newOnes = new LinkedList<>();
-        for(Proxy proxy : proxies){
-            if(proxyDao.findByHost(proxy.getHost().toHostString()) == null)
+        for (Proxy proxy : proxies) {
+            if (proxyDao.findByHost(proxy.getHost().toHostString()) == null)
                 newOnes.add(proxy);
         }
         try {
