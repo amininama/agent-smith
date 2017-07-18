@@ -6,6 +6,8 @@ import java.util.Date;
 /**
  * Created by amin on 7/17/17.
  */
+@Entity
+@Table(name = "agent_session_action")
 public class AgentSessionAction {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,7 +23,12 @@ public class AgentSessionAction {
     @Column(name = "status_code")
     private int statusCode;
     @Column(name = "response_time")
-    private int responseTime;
+    private long responseTime;
+
+    @PrePersist
+    private void init(){
+        this.initDate = new Date();
+    }
 
     public long getId() {
         return id;
@@ -71,11 +78,11 @@ public class AgentSessionAction {
         this.statusCode = statusCode;
     }
 
-    public int getResponseTime() {
+    public long getResponseTime() {
         return responseTime;
     }
 
-    public void setResponseTime(int responseTime) {
+    public void setResponseTime(long responseTime) {
         this.responseTime = responseTime;
     }
 }

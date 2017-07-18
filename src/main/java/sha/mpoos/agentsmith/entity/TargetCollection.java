@@ -1,6 +1,9 @@
 package sha.mpoos.agentsmith.entity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,7 +41,17 @@ public class TargetCollection {
         return targets;
     }
 
+    public List<Target> shuffleTargets(){
+        List<Target> shuffled = new ArrayList<>(this.targets);
+        Collections.shuffle(shuffled);
+        return shuffled;
+    }
+
     public void setTargets(Set<Target> targets) {
         this.targets = targets;
+    }
+
+    public void addTarget(Target target){
+        this.targets.add(target);
     }
 }

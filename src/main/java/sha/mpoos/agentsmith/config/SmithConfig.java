@@ -3,8 +3,10 @@ package sha.mpoos.agentsmith.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @Configuration
+@EnableAsync
 public class SmithConfig {
     private @Value("${thread.count}") int threadCount;
     private @Value("${sleep.time.millis}") long sleepTimeMillis;

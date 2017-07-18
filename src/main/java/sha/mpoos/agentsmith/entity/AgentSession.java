@@ -7,6 +7,7 @@ import java.util.Set;
 /**
  * Created by amin on 7/17/17.
  */
+@Entity
 @Table(name = "agent_session")
 public class AgentSession {
     @Id
@@ -20,6 +21,12 @@ public class AgentSession {
     private TargetCollection targetCollection;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, targetEntity = AgentSessionAction.class, mappedBy = "session")
     private Set<AgentSessionAction> sessionActions;
+    @Column(name = "total_req_count", nullable = false)
+    private int totalRequestCount;
+    @Column(name = "concurrent_req_count", nullable = false)
+    private int concurrentRequestCount;
+    @Column(name = "sleep_time_millis", nullable = false)
+    private int sleepTimeMillis;
 
     @PrePersist
     private void init(){
@@ -62,7 +69,35 @@ public class AgentSession {
         return sessionActions;
     }
 
+    public void addSessionAction(AgentSessionAction agentSessionAction){
+        this.sessionActions.add(agentSessionAction);
+    }
+
     public void setSessionActions(Set<AgentSessionAction> sessionActions) {
         this.sessionActions = sessionActions;
+    }
+
+    public int getTotalRequestCount() {
+        return totalRequestCount;
+    }
+
+    public void setTotalRequestCount(int totalRequestCount) {
+        this.totalRequestCount = totalRequestCount;
+    }
+
+    public int getConcurrentRequestCount() {
+        return concurrentRequestCount;
+    }
+
+    public void setConcurrentRequestCount(int concurrentRequestCount) {
+        this.concurrentRequestCount = concurrentRequestCount;
+    }
+
+    public int getSleepTimeMillis() {
+        return sleepTimeMillis;
+    }
+
+    public void setSleepTimeMillis(int sleepTimeMillis) {
+        this.sleepTimeMillis = sleepTimeMillis;
     }
 }
