@@ -32,7 +32,7 @@ public class ProxyManager {
     @Autowired
     private ProxyDao proxyDao;
 
-    public ProxyManager(){
+    public ProxyManager() {
         this.proxyList = new ArrayList<>();
     }
 
@@ -93,16 +93,16 @@ public class ProxyManager {
     }
 
     public void refreshProxyList() {
-        try {
-            Set<Proxy> freshList = new HashSet<>();
-            for (ProxyCrawler crawler : crawlers) {
-                freshList.addAll(crawler.fetchProxyInfo());
+        Set<Proxy> freshList = new HashSet<>();
+        for (ProxyCrawler crawler : crawlers) {
+            try {
+                Set<Proxy> newOnes = crawler.fetchProxyInfo();
+                freshList.addAll(newOnes);
+            } catch (Throwable e) {
+                log.warning("Error while refreshing proxy list for \'" + crawler.getClass().getName() + "\': " + e.getMessage());
             }
-            persist(freshList);
-        } catch (IOException e) {
-            log.warning("Error while refreshing proxy list: " + e.getMessage());
         }
-
+        persist(freshList);
     }
 
     public void persist(Set<Proxy> proxies) {
