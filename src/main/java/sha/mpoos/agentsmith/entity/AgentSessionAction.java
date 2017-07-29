@@ -85,4 +85,17 @@ public class AgentSessionAction {
     public void setResponseTime(long responseTime) {
         this.responseTime = responseTime;
     }
+
+    @Override
+    public String toString() {
+        return "AgentSessionAction{" +
+                "id=" + id +
+                ", initDate=" + initDate +
+                ", target=" + (target == null ? "''" : target.getId()) +
+                ", proxy=" + (proxy == null ? "''" : proxy.getId()) +
+                ", session=" + (session == null ? "''" : session.getId()) +
+                ", statusCode=" + statusCode +
+                ", responseTime=" + responseTime +
+                '}';
+    }
 }

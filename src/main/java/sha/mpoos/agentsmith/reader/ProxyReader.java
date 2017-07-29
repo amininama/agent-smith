@@ -43,4 +43,8 @@ public class ProxyReader {
     public void updateProxyStatistics(HttpResponse response, Proxy proxy) {
         proxyManager.updateProxyStatistics(response, proxy);
     }
+
+    public Proxy returnRandom(){
+        return proxyManager.returnRandom();
+    }
 }

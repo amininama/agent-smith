@@ -26,6 +26,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
@@ -100,8 +101,10 @@ public class TheSmith {
         return () -> {
             Client client = new Client();
             String agent = agentReader.randomAgent();
-            Proxy proxy = proxyReader.testAndReturnRandom();
+//            Proxy proxy = proxyReader.testAndReturnRandom();
+            Proxy proxy = proxyReader.returnRandom();
             for (Target target : agentSession.getTargetCollection().shuffleTargets()) {
+                log.info("Firing req' for target: \'" + target.getAddress() + "\', proxy: " + proxy.getId());
                 AgentSessionAction action = new AgentSessionAction();
                 action.setProxy(proxy);
                 action.setSession(agentSession);
@@ -117,12 +120,18 @@ public class TheSmith {
                     log.warning("Error in sending GET: " + e.getMessage());
                 }
                 proxyReader.updateProxyStatistics(response, proxy);
-                agentSessionActionDao.save(action);
+                log.info("Inserting session-action: " + action);
                 try {
+                    action = agentSessionActionDao.save(action);
+                    log.info("Inserted session-action: " + action);
+                } catch (Throwable t){
+                    log.log(Level.WARNING, "WTF?!", t);
+                }
+                /*try {
                     Thread.sleep(smithConfig.getSleepTimeMillis());
                 } catch (InterruptedException e) {
                     log.warning("Error in sleeping: " + e.getMessage());
-                }
+                }*/
             }
         };
     }

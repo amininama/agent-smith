@@ -50,13 +50,15 @@ public class ProxyManager {
         Random random = new Random();
         while (true) {
             Proxy proxy = this.proxyList.get(random.nextInt(proxyList.size()));
-            log.info("Testing proxy: \'" + proxy.getId() + "\' before use...");
-            try {
-                if (test(proxy)) return proxy;
-            } catch (IOException e) {
-                log.info("Proxy: \'" + proxy.getId() + "\' is not functional");
-            }
+            boolean isFunctional = test(proxy);
+            log.info("Tested proxy: \'" + proxy.getId() + "\', active: " + isFunctional);
+            if (isFunctional) return proxy;
         }
+    }
+
+    public Proxy returnRandom() {
+        Random random = new Random();
+        return this.proxyList.get(random.nextInt(proxyList.size()));
     }
 
     public void updateProxyStatistics(HttpResponse response, Proxy proxy) {
@@ -73,21 +75,27 @@ public class ProxyManager {
         return response.getStatusLine().getStatusCode() / 100 == 2;
     }
 
-    private boolean test(Proxy proxy) throws IOException {
+    private boolean test(Proxy proxy) {
+        boolean successful;
         HttpClient client = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
         HttpGet request = new HttpGet("https://google.com");
         RequestConfig config = RequestConfig.custom()
                 .setProxy(proxy.getHost())
                 .setConnectTimeout(tolerableProxyTimeout * 1000)
-                .setSocketTimeout(tolerableProxyTimeout * 1000)
+                .setSocketTimeout(tolerableProxyTimeout)
                 .build();
         request.setConfig(config);
-        HttpResponse response = client.execute(request);
-        boolean successful = isSuccessful(response);
-        if (successful)
-            proxy.increaseSuccessCount();
-        else
+        try {
+            HttpResponse response = client.execute(request);
+            successful = isSuccessful(response);
+            if (successful)
+                proxy.increaseSuccessCount();
+            else
+                proxy.increaseFailedCount();
+        } catch (Throwable t) {
             proxy.increaseFailedCount();
+            successful = false;
+        }
         proxyDao.save(proxy);
         return successful;
     }
