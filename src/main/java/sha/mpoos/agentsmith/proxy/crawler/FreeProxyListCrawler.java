@@ -1,4 +1,4 @@
-package sha.mpoos.agentsmith.crawler;
+package sha.mpoos.agentsmith.proxy.crawler;
 
 import com.google.common.net.InetAddresses;
 import org.apache.commons.lang3.StringUtils;

@@ -1,4 +1,4 @@
-package sha.mpoos.agentsmith.crawler;
+package sha.mpoos.agentsmith.proxy.manager;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -8,13 +8,17 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import sha.mpoos.agentsmith.proxy.crawler.ProxyCrawler;
 import sha.mpoos.agentsmith.dao.ProxyDao;
 import sha.mpoos.agentsmith.entity.Proxy;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -61,13 +65,17 @@ public class ProxyManager {
         return this.proxyList.get(random.nextInt(proxyList.size()));
     }
 
+    public Proxy returnBest() {
+        List<Proxy> list = proxyDao.findBest(new PageRequest(0, 1));
+        Proxy best = list.get(0);
+        best.setLastFetchDate(new Date());
+        proxyDao.save(best);
+        return best;
+    }
+
     public void updateProxyStatistics(HttpResponse response, Proxy proxy) {
-        if (response == null || !isSuccessful(response)) {
-            proxy.increaseFailedCount();
-        } else {
-            proxy.increaseSuccessCount();
-            proxy.setLastSuccessfulUse(new Date());
-        }
+        boolean isSuccess = !(response == null || !isSuccessful(response));
+        proxy.updateStatsByTestResult(isSuccess);
         proxyDao.save(proxy);
     }
 
@@ -88,14 +96,10 @@ public class ProxyManager {
         try {
             HttpResponse response = client.execute(request);
             successful = isSuccessful(response);
-            if (successful)
-                proxy.increaseSuccessCount();
-            else
-                proxy.increaseFailedCount();
         } catch (Throwable t) {
-            proxy.increaseFailedCount();
             successful = false;
         }
+        proxy.updateStatsByTestResult(successful);
         proxyDao.save(proxy);
         return successful;
     }
@@ -126,5 +130,16 @@ public class ProxyManager {
             //do nothing
         }
         log.info("Refreshed internal proxy-list. added " + newOnes.size() + " new ones.");
+    }
+
+    @Scheduled(fixedRate = 60 * 60 * 1000)
+    public void healthCheck(){
+        log.info("Starting proxy health check");
+        Iterable<Proxy> all = proxyDao.findAll();
+        for(Proxy proxy : all){
+            boolean success = test(proxy);
+            log.log(Level.FINE, "tested proxy: " + proxy.getId() + ", success: " + success);
+        }
+        log.info("finished proxy health check");
     }
 }

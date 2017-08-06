@@ -1,26 +1,14 @@
 package sha.mpoos.agentsmith.reader;
 
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import sha.mpoos.agentsmith.crawler.ProxyCrawler;
-import sha.mpoos.agentsmith.crawler.ProxyManager;
-import sha.mpoos.agentsmith.dao.ProxyDao;
+import sha.mpoos.agentsmith.proxy.manager.ProxyManager;
 import sha.mpoos.agentsmith.entity.Proxy;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.logging.Logger;
 
 @Service
 public class ProxyReader {

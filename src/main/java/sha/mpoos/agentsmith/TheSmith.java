@@ -12,14 +12,12 @@ import sha.mpoos.agentsmith.entity.AgentSession;
 import sha.mpoos.agentsmith.entity.AgentSessionAction;
 import sha.mpoos.agentsmith.entity.Proxy;
 import sha.mpoos.agentsmith.entity.Target;
+import sha.mpoos.agentsmith.proxy.manager.ProxyManager;
 import sha.mpoos.agentsmith.reader.AgentReader;
-import sha.mpoos.agentsmith.reader.ProxyReader;
 import sha.mpoos.agentsmith.reader.TargetListReader;
 
-import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -39,7 +37,7 @@ public class TheSmith {
     @Autowired
     private SmithConfig smithConfig;
     @Autowired
-    private ProxyReader proxyReader;
+    private ProxyManager proxyManager;
     @Autowired
     private AgentSessionActionDao agentSessionActionDao;
     @Autowired
@@ -65,7 +63,7 @@ public class TheSmith {
         return () -> {
             Client client = new Client();
             String agent = agentReader.randomAgent();
-            Proxy proxy = proxyReader.testAndReturnRandom();
+            Proxy proxy = proxyManager.returnBest();
             for (URI target : targetListReader.shuffleList()) {
                 HttpResponse response = null;
                 try {
@@ -73,7 +71,7 @@ public class TheSmith {
                 } catch (Exception e) {
                     log.warning("Error in sending GET: " + e.getMessage());
                 }
-                proxyReader.updateProxyStatistics(response, proxy);
+                proxyManager.updateProxyStatistics(response, proxy);
                 try {
                     Thread.sleep(smithConfig.getSleepTimeMillis());
                 } catch (InterruptedException e) {
@@ -101,8 +99,7 @@ public class TheSmith {
         return () -> {
             Client client = new Client();
             String agent = agentReader.randomAgent();
-//            Proxy proxy = proxyReader.testAndReturnRandom();
-            Proxy proxy = proxyReader.returnRandom();
+            Proxy proxy = proxyManager.returnBest();
             for (Target target : agentSession.getTargetCollection().shuffleTargets()) {
                 log.info("Firing req' for target: \'" + target.getAddress() + "\', proxy: " + proxy.getId());
                 AgentSessionAction action = new AgentSessionAction();
@@ -119,7 +116,7 @@ public class TheSmith {
                 } catch (Exception e) {
                     log.warning("Error in sending GET: " + e.getMessage());
                 }
-                proxyReader.updateProxyStatistics(response, proxy);
+                proxyManager.updateProxyStatistics(response, proxy);
                 log.info("Inserting session-action: " + action);
                 try {
                     action = agentSessionActionDao.save(action);

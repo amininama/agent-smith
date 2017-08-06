@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sha.mpoos.agentsmith.crawler.ProxyManager;
+import sha.mpoos.agentsmith.proxy.manager.ProxyManager;
 
 /**
  * Created by amin on 7/17/17.

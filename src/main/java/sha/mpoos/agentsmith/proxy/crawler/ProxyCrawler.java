@@ -1,4 +1,4 @@
-package sha.mpoos.agentsmith.crawler;
+package sha.mpoos.agentsmith.proxy.crawler;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

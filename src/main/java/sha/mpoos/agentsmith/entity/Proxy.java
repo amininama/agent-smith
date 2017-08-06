@@ -27,6 +27,8 @@ public class Proxy {
     private int successCount;
     @Column(name = "failed_count")
     private int failedCount;
+    @Column(name = "last_fetch_date")
+    private Date lastFetchDate;
 
     public long getId() {
         return id;
@@ -91,6 +93,23 @@ public class Proxy {
 
     public void increaseFailedCount() {
         this.failedCount++;
+    }
+
+    public void updateStatsByTestResult(boolean testIsSuccessful){
+        if(testIsSuccessful){
+            this.increaseSuccessCount();
+            this.setLastSuccessfulUse(new Date());
+        } else {
+            this.increaseFailedCount();
+        }
+    }
+
+    public Date getLastFetchDate() {
+        return lastFetchDate;
+    }
+
+    public void setLastFetchDate(Date lastFetchDate) {
+        this.lastFetchDate = lastFetchDate;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package sha.mpoos.agentsmith.crawler;
+package sha.mpoos.agentsmith.proxy.crawler;
 
 import com.google.common.net.InetAddresses;
 import org.apache.commons.lang3.StringUtils;
@@ -20,24 +20,11 @@ import java.util.logging.Logger;
  */
 
 @Component
-public class HideMyNameCrawler extends ProxyCrawler {
-    private static final Logger log = Logger.getLogger("HideMyNameCrawler");
+public class ProxyDBCrawler extends ProxyCrawler {
+    private static final Logger log = Logger.getLogger("ProxyDBCrawler");
 
-    public HideMyNameCrawler() {
-        this.sourcePage = "https://hidemy.name/en/proxy-list/";
-    }
-
-    public List<String> pageList() throws IOException {
-        List<String> pages = new LinkedList<>();
-        pages.add(this.sourcePage);
-        Document document = Jsoup.connect(this.sourcePage).get();
-        Element paginationElement = document.getElementsByClass("proxy__pagination").first();
-        Elements pageElements = paginationElement.getElementsByTag("a");
-        for (Element a : pageElements) {
-            String href = a.attr("href");
-            pages.add(this.sourcePage.replace("/en/proxy-list/", href));
-        }
-        return pages;
+    public ProxyDBCrawler() {
+        this.sourcePage = "http://proxydb.net/?protocol=http&protocol=https&availability=30&offset=0";
     }
 
     @Override
@@ -45,25 +32,43 @@ public class HideMyNameCrawler extends ProxyCrawler {
         Set<Proxy> proxyList = new HashSet<>();
         log.info("Loading proxy-list from \'" + this.sourcePage + "\'");
         List<String> pages = pageList();
-        for(String page : pages)
+        for (int counter = 0; counter < pages.size(); counter++) {
+            String page = pages.get(counter);
+            log.info("Crawling page: " + (counter + 1) + "/" + pages.size());
             proxyList.addAll(crawlPage(page));
+        }
         log.info("Finished crawling '" + this.sourcePage + "'");
         return proxyList;
+    }
+
+    public List<String> pageList() throws IOException {
+        List<String> pages = new LinkedList<>();
+        Document document = Jsoup.connect(this.sourcePage).get();
+        String info = document.getElementsByClass("text-muted").get(1).html();
+        String[] infoParts = info.split(" ");
+        int total = Integer.parseInt(infoParts[1]);
+        for (int counter = 0; counter < total / 15; counter++) {
+            pages.add(this.sourcePage.replace("offset=0", "offset=".concat(String.valueOf(15 * counter))));
+        }
+        return pages;
     }
 
     private List<Proxy> crawlPage(String page) throws IOException {
         List<Proxy> proxiesInPage = new LinkedList<>();
         Document document = Jsoup.connect(page).get();
-//        Document document = Jsoup.parse(html);
-        Element proxyListTable = document.getElementsByClass("proxy__t").first();
+        Element proxyListTable = document.getElementsByClass("table-sm").first();
+        if (proxyListTable == null) {
+            return proxiesInPage;
+        }
         Elements rows = proxyListTable.getElementsByTag("tr");
         for (Element row : rows) {
             try {
                 Elements cells = row.getElementsByTag("td");
-                String address = cells.get(0).html();
-                String port = cells.get(1).html();
-                String type = cells.get(4).html();
-                if (InetAddresses.isInetAddress(address) && StringUtils.isNumeric(port) && type.contains("HTTP")) {
+                String hostInfo = cells.get(0).getElementsByTag("a").html();
+                String[] hostInfoParts = hostInfo.split(":");
+                String port = hostInfoParts[1];
+                String address = hostInfoParts[0];
+                if (InetAddresses.isInetAddress(address) && StringUtils.isNumeric(port)) {
                     Proxy proxy = new Proxy();
                     proxy.setCreationDate(new Date());
                     proxy.setSuccessCount(0);
@@ -79,4 +84,5 @@ public class HideMyNameCrawler extends ProxyCrawler {
         }
         return proxiesInPage;
     }
+
 }
