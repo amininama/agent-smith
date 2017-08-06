@@ -133,12 +133,12 @@ public class ProxyManager {
     }
 
     @Scheduled(fixedRate = 60 * 60 * 1000)
-    public void healthCheck(){
+    public void healthCheck() {
         log.info("Starting proxy health check");
         Iterable<Proxy> all = proxyDao.findAll();
-        for(Proxy proxy : all){
+        for (Proxy proxy : all) {
             boolean success = test(proxy);
-            log.log(Level.FINE, "tested proxy: " + proxy.getId() + ", success: " + success);
+            log.info("tested proxy: " + proxy.getId() + ", success: " + success);
         }
         log.info("finished proxy health check");
     }
