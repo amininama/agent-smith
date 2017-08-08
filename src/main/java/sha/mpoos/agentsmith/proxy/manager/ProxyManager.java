@@ -9,6 +9,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sha.mpoos.agentsmith.proxy.crawler.ProxyCrawler;
@@ -90,13 +91,15 @@ public class ProxyManager {
         RequestConfig config = RequestConfig.custom()
                 .setProxy(proxy.getHost())
                 .setConnectTimeout(tolerableProxyTimeout * 1000)
-                .setSocketTimeout(tolerableProxyTimeout)
+                .setConnectionRequestTimeout(tolerableProxyTimeout * 1000)
+                .setSocketTimeout(tolerableProxyTimeout * 1000)
                 .build();
         request.setConfig(config);
         try {
             HttpResponse response = client.execute(request);
             successful = isSuccessful(response);
         } catch (Throwable t) {
+            log.info("Exception caught while testing proxy: " + proxy.getId() + ", cause: " + t.getMessage());
             successful = false;
         }
         proxy.updateStatsByTestResult(successful);
@@ -104,6 +107,7 @@ public class ProxyManager {
         return successful;
     }
 
+    @Async
     public void refreshProxyList() {
         Set<Proxy> freshList = new HashSet<>();
         for (ProxyCrawler crawler : crawlers) {
