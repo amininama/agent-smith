@@ -137,8 +137,12 @@ public class ProxyManager {
         log.info("Starting proxy health check");
         Iterable<Proxy> all = proxyDao.findAll();
         for (Proxy proxy : all) {
-            boolean success = test(proxy);
-            log.info("tested proxy: " + proxy.getId() + ", success: " + success);
+            try{
+                boolean success = test(proxy);
+                log.info("tested proxy: " + proxy.getId() + ", success: " + success);
+            } catch (Throwable t) {
+                log.info("Shit happened! " + t.getMessage());
+            }
         }
         log.info("finished proxy health check");
     }
