@@ -65,9 +65,9 @@ public class TheSmith {
             String agent = agentReader.randomAgent();
             Proxy proxy = proxyManager.returnBest();
             for (URI target : targetListReader.shuffleList()) {
-                HttpResponse response = null;
+                int response = 0;
                 try {
-                    response = client.sendGet(agent, target, proxy);
+                    response = client.sendGet(agent, target, proxy, smithConfig.getClientTimeoutSecs());
                 } catch (Exception e) {
                     log.warning("Error in sending GET: " + e.getMessage());
                 }
@@ -106,13 +106,13 @@ public class TheSmith {
                 action.setProxy(proxy);
                 action.setSession(agentSession);
                 action.setTarget(target);
-                HttpResponse response = null;
+                int response = 0;
                 try {
                     long before = System.currentTimeMillis();
-                    response = client.sendGet(agent, target.getAddressAsURI(), proxy);
+                    response = client.sendGet(agent, target.getAddressAsURI(), proxy, smithConfig.getClientTimeoutSecs());
                     long responseTime = System.currentTimeMillis() - before;
                     action.setResponseTime(responseTime);
-                    action.setStatusCode(response.getStatusLine().getStatusCode());
+                    action.setStatusCode(response);
                 } catch (Exception e) {
                     log.warning("Error in sending GET: " + e.getMessage());
                 }

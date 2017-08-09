@@ -1,13 +1,16 @@
 package sha.mpoos.agentsmith.client;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import sha.mpoos.agentsmith.entity.Proxy;
 
@@ -29,43 +32,30 @@ public class Client {
         request.addHeader("User-Agent", userAgent);
         HttpResponse response = client.execute(request);
         log.info("Sent 'GET' request to URL : " + target.toString() + ", Response Code : " + response.getStatusLine().getStatusCode());
-        //writing response
-        /*
-        BufferedReader rd = new BufferedReader(
-                new InputStreamReader(response.getEntity().getContent()));
-        StringBuilder result = new StringBuilder();
-        String line = "";
-        while ((line = rd.readLine()) != null) {
-            result.append(line);
-        }
-        log.info(result.toString());
-        */
     }
 
-    public HttpResponse sendGet(String userAgent, URI target, Proxy proxy) throws Exception {
-        HttpClient client = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
-        HttpGet request = new HttpGet(target);
-        // setup proxy
-        RequestConfig config = RequestConfig.custom().setProxy(proxy.getHost()).build();
-        request.setConfig(config);
-        // add request header
-        request.addHeader("User-Agent", userAgent);
-        long before = System.currentTimeMillis();
-        HttpResponse response = client.execute(request);
-        long rt = System.currentTimeMillis() - before;
-        log.info("GET, proxy:" + proxy.getId() + "\', URL: \'" + target.toString() +
-                "\', Resp: " + response.getStatusLine().getStatusCode() + ", rt: " + rt);
-        return response;
-        /*
-        BufferedReader rd = new BufferedReader(
-                new InputStreamReader(response.getEntity().getContent()));
-        StringBuilder result = new StringBuilder();
-        String line = "";
-        while ((line = rd.readLine()) != null) {
-            result.append(line);
+    public int sendGet(String userAgent, URI target, Proxy proxy, int timeoutSecs) throws Exception {
+        try (CloseableHttpClient client = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build()) {
+            HttpGet request = new HttpGet(target);
+            // setup proxy and timeout
+            RequestConfig config = RequestConfig.custom()
+                    .setProxy(proxy.getHost())
+                    .setConnectTimeout(timeoutSecs * 1000)
+                    .setSocketTimeout(timeoutSecs * 1000)
+                    .setConnectionRequestTimeout(timeoutSecs * 1000)
+                    .build();
+            request.setConfig(config);
+            // add request header
+            if(StringUtils.isNotBlank(userAgent))
+                request.addHeader("User-Agent", userAgent);
+            long before = System.currentTimeMillis();
+            try (CloseableHttpResponse response = client.execute(request)) {
+                long rt = System.currentTimeMillis() - before;
+                log.info("GET, proxy:" + proxy.getId() + "\', URL: \'" + target.toString() +
+                        "\', Resp: " + response.getStatusLine().getStatusCode() + ", rt: " + rt);
+                return response.getStatusLine().getStatusCode();
+            }
         }
-        System.out.println(result.toString());
-        */
     }
 
     public void sendGet(String userAgent, URI target, String clientIP) throws Exception {
@@ -81,16 +71,6 @@ public class Client {
 
         HttpResponse response = client.execute(request);
         log.info(clientIP + " 'GET' \'" + target.toString() + "\', \'" + userAgent + "\' -> " + response.getStatusLine().getStatusCode());
-/*
-        BufferedReader rd = new BufferedReader(
-                new InputStreamReader(response.getEntity().getContent()));
-        StringBuilder result = new StringBuilder();
-        String line = "";
-        while ((line = rd.readLine()) != null) {
-            result.append(line);
-        }
-        log.info(result.toString());
-*/
     }
 
     public void sendPost(String userAgent, URI target, List<NameValuePair> urlParameters) throws Exception {

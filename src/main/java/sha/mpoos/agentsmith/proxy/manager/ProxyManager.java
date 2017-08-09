@@ -5,6 +5,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,12 +13,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import sha.mpoos.agentsmith.client.Client;
 import sha.mpoos.agentsmith.proxy.crawler.ProxyCrawler;
 import sha.mpoos.agentsmith.dao.ProxyDao;
 import sha.mpoos.agentsmith.entity.Proxy;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +39,8 @@ public class ProxyManager {
     private List<Proxy> proxyList;
     @Autowired
     private ProxyDao proxyDao;
+    @Autowired
+    private Client client;
 
     public ProxyManager() {
         this.proxyList = new ArrayList<>();
@@ -74,32 +79,21 @@ public class ProxyManager {
         return best;
     }
 
-    public void updateProxyStatistics(HttpResponse response, Proxy proxy) {
-        boolean isSuccess = !(response == null || !isSuccessful(response));
-        proxy.updateStatsByTestResult(isSuccess);
+    public void updateProxyStatistics(int response, Proxy proxy) {
+        proxy.updateStatsByTestResult(isSuccessful(response));
         proxyDao.save(proxy);
     }
 
-    private boolean isSuccessful(HttpResponse response) {
-        return response.getStatusLine().getStatusCode() / 100 == 2;
+    private boolean isSuccessful(int response) {
+        return response / 100 == 2;
     }
 
     private boolean test(Proxy proxy) {
         boolean successful;
-        HttpClient client = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
-        HttpGet request = new HttpGet("https://google.com");
-        RequestConfig config = RequestConfig.custom()
-                .setProxy(proxy.getHost())
-                .setConnectTimeout(tolerableProxyTimeout * 1000)
-                .setConnectionRequestTimeout(tolerableProxyTimeout * 1000)
-                .setSocketTimeout(tolerableProxyTimeout * 1000)
-                .build();
-        request.setConfig(config);
         try {
-            HttpResponse response = client.execute(request);
+            int response = client.sendGet(null, new URI("https://google.com"), proxy, tolerableProxyTimeout);
             successful = isSuccessful(response);
         } catch (Throwable t) {
-            log.info("Exception caught while testing proxy: " + proxy.getId() + ", cause: " + t.getMessage());
             successful = false;
         }
         proxy.updateStatsByTestResult(successful);
@@ -141,7 +135,7 @@ public class ProxyManager {
         log.info("Starting proxy health check");
         Iterable<Proxy> all = proxyDao.findAll();
         for (Proxy proxy : all) {
-            try{
+            try {
                 boolean success = test(proxy);
                 log.info("tested proxy: " + proxy.getId() + ", success: " + success);
             } catch (Throwable t) {
