@@ -19,4 +19,10 @@ public class ProxyController {
         this.proxyManager.refreshProxyList();
         return ResponseEntity.ok(true);
     }
+
+    @RequestMapping("/proxy/health/check")
+    public ResponseEntity proxyHealthCheck() {
+        this.proxyManager.healthCheck();
+        return ResponseEntity.ok(null);
+    }
 }
