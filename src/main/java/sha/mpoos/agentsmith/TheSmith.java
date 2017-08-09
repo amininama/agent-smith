@@ -42,6 +42,8 @@ public class TheSmith {
     private AgentSessionActionDao agentSessionActionDao;
     @Autowired
     private AgentSessionDao agentSessionDao;
+    @Autowired
+    private Client client;
 
     public TheSmith() {
     }
@@ -61,7 +63,6 @@ public class TheSmith {
 
     private Runnable buildJob() {
         return () -> {
-            Client client = new Client();
             String agent = agentReader.randomAgent();
             Proxy proxy = proxyManager.returnBest();
             for (URI target : targetListReader.shuffleList()) {
@@ -97,7 +98,6 @@ public class TheSmith {
 
     private Runnable buildJob(AgentSession agentSession) {
         return () -> {
-            Client client = new Client();
             String agent = agentReader.randomAgent();
             Proxy proxy = proxyManager.returnBest();
             for (Target target : agentSession.getTargetCollection().shuffleTargets()) {

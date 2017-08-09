@@ -12,12 +12,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.stereotype.Service;
 import sha.mpoos.agentsmith.entity.Proxy;
 
 import java.net.URI;
 import java.util.List;
 import java.util.logging.Logger;
 
+@Service
 public class Client {
     private static final Logger log = Logger.getLogger("Client");
 
