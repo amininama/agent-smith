@@ -12,6 +12,7 @@ SOCKS_PROXY_PORT=1234
 MYSQL_ROOT_PASSWORD=chizchizchiz
 RELOAD_PROXIES_ON_BOOT=true
 BUILD_BEFOREHAND="false"
+CLIENT_TIMEOUT_SECS=3
 #================
 
 if [ "$BUILD_BEFOREHAND" == "true" ]; then
@@ -36,5 +37,6 @@ JAR=$(JARS=($PROJECT_HOME/*.jar); IFS=:; echo "${JARS[*]}")
 APP_OPTS='--thread.count='$TOTAL_CLIENT_COUNT' --sleep.time.millis='$SLEEP_BETWEEN_REQUESTS' --agents.source='$AGENTS_FILE
 APP_OPTS=$APP_OPTS' --targets.source='$TARGETS_FILE' --spring.datasource.password='$MYSQL_ROOT_PASSWORD
 APP_OPTS=$APP_OPTS' --proxies.load.on.boot='$RELOAD_PROXIES_ON_BOOT' --thread.concurrent='$CONCURRENT_CLIENT_COUNT
+APP_OPTS=$APP_OPTS' --client.timeout.secs='$CLIENT_TIMEOUT_SECS
 export LC_ALL='fa_IR.utf8'
 java $OPTS -Xms$MEM_MIN -Xmx$MEM_MAX $GC_OPTS -jar $JAR $APP_OPTS

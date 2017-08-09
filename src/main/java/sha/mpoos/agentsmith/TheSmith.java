@@ -56,7 +56,7 @@ public class TheSmith {
             for (URI target : targetListReader.shuffleList()) {
                 HttpResponse response = null;
                 try {
-                    response = client.sendGet(agent, target, proxy);
+                    response = client.sendGet(agent, target, proxy, smithConfig.getClientTimeoutSecs());
                 } catch (Exception e) {
                     log.warning("Error in sending GET: " + e.getMessage());
                 }

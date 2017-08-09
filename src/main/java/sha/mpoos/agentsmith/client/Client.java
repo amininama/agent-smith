@@ -42,11 +42,16 @@ public class Client {
         */
     }
 
-    public HttpResponse sendGet(String userAgent, URI target, Proxy proxy) throws Exception {
+    public HttpResponse sendGet(String userAgent, URI target, Proxy proxy, int timeoutSecs) throws Exception {
         HttpClient client = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
         HttpGet request = new HttpGet(target);
         // setup proxy
-        RequestConfig config = RequestConfig.custom().setProxy(proxy.getHost()).build();
+        RequestConfig config = RequestConfig.custom()
+                .setProxy(proxy.getHost())
+                .setConnectionRequestTimeout(timeoutSecs * 1000)
+                .setConnectTimeout(timeoutSecs * 1000)
+                .setSocketTimeout(timeoutSecs * 1000)
+                .build();
         request.setConfig(config);
         // add request header
         request.addHeader("User-Agent", userAgent);
