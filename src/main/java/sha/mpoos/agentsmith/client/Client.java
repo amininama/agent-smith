@@ -8,9 +8,13 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import sha.mpoos.agentsmith.entity.Proxy;
 
@@ -22,11 +26,18 @@ import java.util.logging.Logger;
 public class Client {
     private static final Logger log = Logger.getLogger("Client");
 
+    private @Value("${thread.concurrent}") int maxTotalPoolConnections;
+
     private CloseableHttpClient client;
 
     public Client() {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        cm.setMaxTotal(maxTotalPoolConnections);
+        cm.setValidateAfterInactivity(1000);
+        cm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(1000).build());
         this.client = HttpClients.custom()
                 .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                .setConnectionManager(cm)
                 .build();
     }
 
