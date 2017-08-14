@@ -14,8 +14,11 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
+import sha.mpoos.agentsmith.config.ClientConfig;
 import sha.mpoos.agentsmith.entity.Proxy;
 
 import java.net.URI;
@@ -26,13 +29,13 @@ import java.util.logging.Logger;
 public class Client {
     private static final Logger log = Logger.getLogger("Client");
 
-    private @Value("${thread.concurrent}") int maxTotalPoolConnections;
-
+    @Autowired
+    private ClientConfig clientConfig;
     private CloseableHttpClient client;
 
     public Client() {
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        cm.setMaxTotal(maxTotalPoolConnections);
+        cm.setMaxTotal(clientConfig.getMaxTotalPoolConnections());
         cm.setValidateAfterInactivity(1000);
         cm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(1000).build());
         this.client = HttpClients.custom()
