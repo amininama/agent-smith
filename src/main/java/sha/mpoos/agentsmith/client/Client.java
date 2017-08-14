@@ -3,7 +3,6 @@ package sha.mpoos.agentsmith.client;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,12 +22,15 @@ import java.util.logging.Logger;
 public class Client {
     private static final Logger log = Logger.getLogger("Client");
 
-    public Client() {
+    private CloseableHttpClient client;
 
+    public Client() {
+        this.client = HttpClients.custom()
+                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                .build();
     }
 
     public void sendGet(String userAgent, URI target) throws Exception {
-        HttpClient client = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
         HttpGet request = new HttpGet(target);
         // add request header
         request.addHeader("User-Agent", userAgent);
@@ -37,31 +39,28 @@ public class Client {
     }
 
     public int sendGet(String userAgent, URI target, Proxy proxy, int timeoutSecs) throws Exception {
-        try (CloseableHttpClient client = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build()) {
-            HttpGet request = new HttpGet(target);
-            // setup proxy and timeout
-            RequestConfig config = RequestConfig.custom()
-                    .setProxy(proxy.getHost())
-                    .setConnectTimeout(timeoutSecs * 1000)
-                    .setSocketTimeout(timeoutSecs * 1000)
-                    .setConnectionRequestTimeout(timeoutSecs * 1000)
-                    .build();
-            request.setConfig(config);
-            // add request header
-            if(StringUtils.isNotBlank(userAgent))
-                request.addHeader("User-Agent", userAgent);
-            long before = System.currentTimeMillis();
-            try (CloseableHttpResponse response = client.execute(request)) {
-                long rt = System.currentTimeMillis() - before;
-                log.info("GET, proxy:" + proxy.getId() + "\', URL: \'" + target.toString() +
-                        "\', Resp: " + response.getStatusLine().getStatusCode() + ", rt: " + rt);
-                return response.getStatusLine().getStatusCode();
-            }
+        HttpGet request = new HttpGet(target);
+        // setup proxy and timeout
+        RequestConfig config = RequestConfig.custom()
+                .setProxy(proxy.getHost())
+                .setConnectTimeout(timeoutSecs * 1000)
+                .setSocketTimeout(timeoutSecs * 1000)
+                .setConnectionRequestTimeout(timeoutSecs * 1000)
+                .build();
+        request.setConfig(config);
+        // add request header
+        if (StringUtils.isNotBlank(userAgent))
+            request.addHeader("User-Agent", userAgent);
+        long before = System.currentTimeMillis();
+        try (CloseableHttpResponse response = client.execute(request)) {
+            long rt = System.currentTimeMillis() - before;
+            log.info("GET, proxy:" + proxy.getId() + "\', URL: \'" + target.toString() +
+                    "\', Resp: " + response.getStatusLine().getStatusCode() + ", rt: " + rt);
+            return response.getStatusLine().getStatusCode();
         }
     }
 
     public void sendGet(String userAgent, URI target, String clientIP) throws Exception {
-        HttpClient client = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
         HttpGet request = new HttpGet(target);
         // add request user-agent header
         request.addHeader("User-Agent", userAgent);
@@ -76,7 +75,6 @@ public class Client {
     }
 
     public void sendPost(String userAgent, URI target, List<NameValuePair> urlParameters) throws Exception {
-        HttpClient client = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
         HttpPost post = new HttpPost(target);
         // add header
         post.setHeader("User-Agent", userAgent);

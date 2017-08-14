@@ -1,12 +1,5 @@
 package sha.mpoos.agentsmith.proxy.manager;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -14,15 +7,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sha.mpoos.agentsmith.client.Client;
-import sha.mpoos.agentsmith.proxy.crawler.ProxyCrawler;
 import sha.mpoos.agentsmith.dao.ProxyDao;
 import sha.mpoos.agentsmith.entity.Proxy;
+import sha.mpoos.agentsmith.proxy.crawler.ProxyCrawler;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
