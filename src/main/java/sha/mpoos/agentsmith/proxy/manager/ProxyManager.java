@@ -128,8 +128,9 @@ public class ProxyManager {
         Iterable<Proxy> all = proxyDao.findAll();
         for (Proxy proxy : all) {
             try {
+                long before = System.currentTimeMillis();
                 boolean success = test(proxy);
-                log.info("tested proxy: " + proxy.getId() + ", success: " + success);
+                log.info("tested proxy: " + proxy.getId() + ", success: " + success + ", rt: " + (System.currentTimeMillis() - before));
             } catch (Throwable t) {
                 log.info("Shit happened! " + t.getMessage());
             }

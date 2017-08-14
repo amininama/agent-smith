@@ -101,13 +101,4 @@ public class Client {
         System.out.println(result.toString());
         */
     }
-
-    public static void main(String[] args) throws Exception {
-        System.setProperty("sun.net.spi.nameservice.nameservers", "85.214.73.63,85.214.73.63,85.214.73.63,85.214.73.63");
-        System.setProperty("socksProxyHost", "127.0.0.1");
-        System.setProperty("socksProxyPort", "1234");
-        Client client = new Client();
-        client.sendGet("Mozilla/5.0 (BeOS; U; BeOS BePC; en-US; rv:1.8.1.6) Gecko/20070731 BonEcho/2.0.0.6",
-                new URI("https://free-proxy-list.net"));
-    }
 }
