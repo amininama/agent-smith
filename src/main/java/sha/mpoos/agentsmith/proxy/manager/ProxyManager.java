@@ -83,7 +83,7 @@ public class ProxyManager {
     private boolean test(Proxy proxy) {
         boolean successful;
         try {
-            int response = client.sendGet(null, new URI("https://google.com"), proxy, tolerableProxyTimeout);
+            int response = client.sendGet(null, new URI("https://google.com"), proxy, tolerableProxyTimeout, true);
             successful = isSuccessful(response);
         } catch (Throwable t) {
             successful = false;

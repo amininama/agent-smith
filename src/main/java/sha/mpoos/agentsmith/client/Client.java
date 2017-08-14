@@ -8,19 +8,17 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import sha.mpoos.agentsmith.config.ClientConfig;
 import sha.mpoos.agentsmith.entity.Proxy;
 
+import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.List;
 import java.util.logging.Logger;
@@ -34,10 +32,14 @@ public class Client {
     private CloseableHttpClient client;
 
     public Client() {
+    }
+
+    @PostConstruct
+    public void init(){
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         cm.setMaxTotal(clientConfig.getMaxTotalPoolConnections());
-        cm.setValidateAfterInactivity(1000);
-        cm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(1000).build());
+        cm.setValidateAfterInactivity(1000 * clientConfig.getValidateAfterInactivity());
+        cm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(1000 * clientConfig.getDefaultSocketTimeout()).build());
         this.client = HttpClients.custom()
                 .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                 .setConnectionManager(cm)
@@ -53,6 +55,10 @@ public class Client {
     }
 
     public int sendGet(String userAgent, URI target, Proxy proxy, int timeoutSecs) throws Exception {
+        return this.sendGet(userAgent, target, proxy, timeoutSecs, false);
+    }
+
+    public int sendGet(String userAgent, URI target, Proxy proxy, int timeoutSecs, boolean isTest) throws Exception {
         HttpGet request = new HttpGet(target);
         // setup proxy and timeout
         RequestConfig config = RequestConfig.custom()
@@ -68,6 +74,7 @@ public class Client {
         long before = System.currentTimeMillis();
         try (CloseableHttpResponse response = client.execute(request)) {
             long rt = System.currentTimeMillis() - before;
+            if(!isTest)
             log.info("GET, proxy:" + proxy.getId() + "\', URL: \'" + target.toString() +
                     "\', Resp: " + response.getStatusLine().getStatusCode() + ", rt: " + rt);
             return response.getStatusLine().getStatusCode();
