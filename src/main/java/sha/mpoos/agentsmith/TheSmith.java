@@ -96,7 +96,7 @@ public class TheSmith {
         agentSessionDao.save(agentSession);
     }
 
-    private Runnable buildJob(AgentSession agentSession) {
+    private Runnable buildJob(final AgentSession agentSession) {
         return () -> {
             String agent = agentReader.randomAgent();
             Proxy proxy = proxyManager.returnBest();
@@ -104,22 +104,26 @@ public class TheSmith {
                 log.info("Firing req' for target: \'" + target.getAddress() + "\', proxy: " + proxy.getId());
                 AgentSessionAction action = new AgentSessionAction();
                 action.setProxy(proxy);
-                action.setSession(agentSession);
                 action.setTarget(target);
                 int response = 0;
+                long responseTime = -1;
                 try {
                     long before = System.currentTimeMillis();
                     response = client.sendGet(agent, target.getAddressAsURI(), proxy, smithConfig.getClientTimeoutSecs());
-                    long responseTime = System.currentTimeMillis() - before;
-                    action.setResponseTime(responseTime);
-                    action.setStatusCode(response);
+                    responseTime = System.currentTimeMillis() - before;
                 } catch (Exception e) {
                     log.warning("Error in sending GET: " + e.getMessage());
                 }
+                action.setResponseTime(responseTime);
+                action.setStatusCode(response);
                 proxyManager.updateProxyStatistics(response, proxy);
                 log.info("Inserting session-action: " + action);
                 try {
-                    action = agentSessionActionDao.save(action);
+//                    AgentSession saveSubject = agentSessionDao.findOne(agentSession.getId());
+//                    action.setSession(saveSubject);
+//                    saveSubject.addSessionAction(action);
+//                    agentSessionDao.save(saveSubject);
+                    //todo: make it work!!!
                     log.info("Inserted session-action: " + action);
                 } catch (Throwable t){
                     log.log(Level.WARNING, "WTF?!", t);

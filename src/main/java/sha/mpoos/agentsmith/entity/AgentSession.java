@@ -2,6 +2,7 @@ package sha.mpoos.agentsmith.entity;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -70,6 +71,7 @@ public class AgentSession {
     }
 
     public void addSessionAction(AgentSessionAction agentSessionAction){
+        if(this.sessionActions == null) this.sessionActions = new HashSet<>();
         this.sessionActions.add(agentSessionAction);
     }
 

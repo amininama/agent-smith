@@ -10,16 +10,24 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sha.mpoos.agentsmith.config.ClientConfig;
 import sha.mpoos.agentsmith.entity.Proxy;
 
 import javax.annotation.PostConstruct;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -35,13 +43,19 @@ public class Client {
     }
 
     @PostConstruct
-    public void init(){
+    public void init() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         cm.setMaxTotal(clientConfig.getMaxTotalPoolConnections());
         cm.setValidateAfterInactivity(1000 * clientConfig.getValidateAfterInactivity());
         cm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(1000 * clientConfig.getDefaultSocketTimeout()).build());
+        SSLContext sslContext = SSLContextBuilder
+                .create()
+                .loadTrustMaterial(new TrustSelfSignedStrategy())
+                .build();
+        HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
+        SSLConnectionSocketFactory connectionFactory = new SSLConnectionSocketFactory(sslContext, allowAllHosts);
         this.client = HttpClients.custom()
-                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                .setSSLSocketFactory(connectionFactory)
                 .setConnectionManager(cm)
                 .build();
     }
